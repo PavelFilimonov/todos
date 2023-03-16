@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import './task-list.css';
+import './TaskList.css';
 
-import Task from '../task';
+import Task from '../Task';
 
 export default class TaskList extends Component {
   render() {

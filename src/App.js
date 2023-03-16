@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 
-import NewTaskForm from './components/new-task-form';
-import TaskList from './components/task-list';
-import Footer from './components/footer';
+import NewTaskForm from './components/NewTaskForm/';
+import TaskList from './components/TaskList/';
+import Footer from './components/Footer/';
 
 export default class App extends Component {
   state = {
@@ -57,9 +57,13 @@ export default class App extends Component {
   filteredItems = () => {
     const { todos, filter } = this.state;
     return todos.filter(({ completed }) => {
-      const all = filter === 'All';
-      const done = filter === 'Completed';
-      return all ? true : done ? completed === true : completed === false;
+      if (filter === 'All') {
+        return true;
+      } else if (filter === 'Completed') {
+        return completed === true;
+      } else {
+        return completed === false;
+      }
     });
   };
 

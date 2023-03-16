@@ -3,7 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import KG from 'date-fns/locale/en-AU';
 import PropTypes from 'prop-types';
 
-import './task.css';
+import './Task.css';
 
 export default class Task extends Component {
   state = {

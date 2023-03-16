@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import './footer.css';
+import './Footer.css';
 
-import TasksFilter from '../tasks-filter';
+import TasksFilter from '../TasksFilter/';
 
 export default class Footer extends Component {
   render() {
