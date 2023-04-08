@@ -12,7 +12,7 @@ export default class App extends Component {
 
   addTask = (text) => {
     const task = {
-      id: this.state.todos.length + 1,
+      id: this.state.todos.length + 2,
       label: text,
       completed: false,
       date: new Date(),
