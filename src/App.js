@@ -1,92 +1,129 @@
 import React, { Component } from 'react';
 
-import NewTaskForm from './components/NewTaskForm/';
-import TaskList from './components/TaskList/';
-import Footer from './components/Footer/';
+import NewTaskForm from './components/NewTaskForm';
+import TaskList from './components/TaskList';
+import Footer from './components/Footer';
 
 export default class App extends Component {
   state = {
-    todos: [],
-    filter: 'All',
+    tasks: [],
+    buttons: [
+      { id: 1, value: 'All', active: true },
+      { id: 2, value: 'Active', active: false },
+      { id: 3, value: 'Completed', active: false },
+    ],
+    btnFilter: 1,
   };
 
-  addTask = (text) => {
-    const task = {
-      id: this.state.todos.length + 2,
-      label: text,
-      completed: false,
+  createTask = (text, minutes, seconds) => {
+    return {
+      id: this.state.tasks.length + 1,
+      editing: false,
+      done: false,
       date: new Date(),
+      text,
+      timeLeft: Number(minutes) * 60 + Number(seconds),
     };
-    this.setState(({ todos }) => ({ todos: [...todos, task] }));
   };
 
-  deleteTask = (idx) => {
-    this.setState(({ todos }) => ({
-      todos: todos.filter(({ id }) => id !== idx),
-    }));
-  };
-
-  changeStatus = (idx, data) => {
-    this.setState(({ todos }) => ({
-      todos: todos.map((todo) => {
-        if (idx === todo.id) {
-          todo.completed = data;
-        }
-        return todo;
-      }),
-    }));
-  };
-
-  editTask = (idx, text) => {
-    this.setState(({ todos }) => ({
-      todos: todos.map((todo) => {
-        if (todo.id === idx) {
-          todo.label = text;
-        }
-        return todo;
-      }),
-    }));
-  };
-
-  clearCompleted = () => {
-    this.setState(({ todos }) => ({
-      todos: todos.filter((task) => !task.completed),
-    }));
-  };
-
-  filteredItems = () => {
-    const { todos, filter } = this.state;
-    return todos.filter(({ completed }) => {
-      if (filter === 'All') {
-        return true;
-      } else if (filter === 'Completed') {
-        return completed === true;
-      } else {
-        return completed === false;
-      }
+  addTask = (text, minutes, seconds) => {
+    const newTask = this.createTask(text, minutes, seconds);
+    this.setState(({ tasks }) => {
+      const newData = [...tasks, newTask];
+      return { tasks: newData };
     });
   };
 
-  changeFilter = (status) => {
-    this.setState({ filter: status });
+  deleteTask = (idx) => {
+    this.setState(({ tasks }) => {
+      const newTasks = tasks.filter((task) => task.id !== idx);
+      return { tasks: newTasks };
+    });
+  };
+
+  editTask = (idx) => {
+    this.setState(({ tasks }) => {
+      const newTasks = tasks.map((task) => {
+        if (task.id === idx) {
+          return { ...task, editing: true };
+        } else {
+          return { ...task };
+        }
+      });
+      return { tasks: newTasks };
+    });
+  };
+
+  saveChanges = (idx, event) => {
+    if (event.key === 'Enter') {
+      this.setState(({ tasks }) => {
+        const newTasks = tasks.map((task) => {
+          if (task.id === idx) {
+            return { ...task, editing: false, text: event.target.value };
+          } else {
+            return { ...task };
+          }
+        });
+        return { tasks: newTasks };
+      });
+    }
+  };
+
+  onDone = (idx) => {
+    this.setState(({ tasks }) => {
+      const index = tasks.findIndex((task) => task.id === idx);
+      const checkedTask = tasks[index];
+      const onDoneTask = { ...checkedTask, done: !checkedTask.done };
+      const newTasks = [...tasks.slice(0, index), onDoneTask, ...tasks.slice(index + 1)];
+      return { tasks: newTasks };
+    });
+  };
+
+  activeBtn = (idx) => {
+    this.setState(({ buttons }) => {
+      const newButtons = buttons.map((button) => {
+        if (button.id === idx) {
+          return { ...button, active: true };
+        } else {
+          return { ...button, active: false };
+        }
+      });
+      return { buttons: newButtons };
+    });
+  };
+
+  filteredTasks = (idx) => {
+    this.setState({ btnFilter: idx });
+    this.activeBtn(idx);
+  };
+
+  clearCompleted = () => {
+    this.setState(({ tasks }) => {
+      const newTask = tasks.filter((task) => !task.done);
+      return { tasks: newTask };
+    });
   };
 
   render() {
+    const backlogTasks = this.state.tasks.filter(({ done }) => !done).length;
     return (
       <section className="todoapp">
-        <NewTaskForm placeholder="What needs to be done?" addTask={this.addTask} />
+        <NewTaskForm addTask={this.addTask} />
         <section className="main">
           <TaskList
-            todos={this.filteredItems()}
-            changeStatus={this.changeStatus}
+            tasks={this.state.tasks}
+            onDeleted={this.deleteTask}
             editTask={this.editTask}
-            deleteTask={this.deleteTask}
+            saveChanges={this.saveChanges}
+            onDone={this.onDone}
+            btnFilter={this.state.btnFilter}
           />
           <Footer
-            backlogTasks={this.state.todos.filter(({ completed }) => !completed).length}
+            buttons={this.state.buttons}
+            backlogTasks={backlogTasks}
+            activeBtn={this.activeBtn}
+            filteredTasks={this.filteredTasks}
             clearCompleted={this.clearCompleted}
-            changeFilter={this.changeFilter}
-            filter={this.state.filter}
           />
         </section>
       </section>

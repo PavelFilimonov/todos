@@ -1,46 +1,26 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
-import './TasksFilter.css';
-
-export default class TasksFilter extends Component {
-  render() {
-    const { changeFilter, filter } = this.props;
-    return (
-      <ul className="filters">
-        <li>
-          <button type="button" className={filter === 'All' ? 'selected' : null} onClick={() => changeFilter('All')}>
-            All
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            className={filter === 'Active' ? 'selected' : null}
-            onClick={() => changeFilter('Active')}
-          >
-            Active
-          </button>
-        </li>
-        <li>
-          <button
-            type="button"
-            className={filter === 'Completed' ? 'selected' : null}
-            onClick={() => changeFilter('Completed')}
-          >
-            Completed
-          </button>
-        </li>
-      </ul>
-    );
+export default function TasksFilter({ value, active, filteredTasks }) {
+  let btnClass = '';
+  if (active) {
+    btnClass = 'selected';
   }
+  return (
+    <li>
+      <button className={btnClass} onClick={filteredTasks}>
+        {value}
+      </button>
+    </li>
+  );
 }
 
-TasksFilter.propTypes = {
-  filter: PropTypes.string,
-  changeFilter: PropTypes.func.isRequired,
+TasksFilter.defaultProps = {
+  active: false,
 };
 
-TasksFilter.defaultProps = {
-  filter: 'All',
+TasksFilter.propTypes = {
+  value: PropTypes.string.isRequired,
+  active: PropTypes.bool.isRequired,
+  filteredTasks: PropTypes.func.isRequired,
 };

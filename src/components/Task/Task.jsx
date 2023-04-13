@@ -3,84 +3,108 @@ import { formatDistanceToNow } from 'date-fns';
 import KG from 'date-fns/locale/en-AU';
 import PropTypes from 'prop-types';
 
-import './Task.css';
-
 export default class Task extends Component {
   state = {
-    editing: false,
-    value: '',
+    value: this.props.text,
+    timer: this.props.timeLeft,
   };
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-    const {
-      editTask,
-      todo: { id },
-    } = this.props;
-    editTask(id, this.state.value);
-    this.setState({ editing: false, value: '' });
+  interval = null;
+
+  changeTimer = () => {
+    if (this.state.timer > 0) {
+      this.interval = setInterval(() => this.setState({ timer: this.state.timer - 1 }), 1000);
+    }
+  };
+
+  pauseTimer = () => {
+    clearInterval(this.interval);
+  };
+
+  editValue = (event) => {
+    this.setState({ value: event.target.value });
   };
 
   render() {
-    const { todo, changeStatus, deleteTask } = this.props;
-    const { id, label, completed, date } = todo;
+    const { id, editing, done, date, text, onDeleted, editTask, saveChanges, onDone } = this.props;
+    let liClass = '';
+    let liChecked = '';
+    if (done) {
+      liClass = 'completed';
+      liChecked = 'checked';
+    }
+    if (editing) {
+      liClass = 'editing';
+    }
+
+    let timeCreated = formatDistanceToNow(date, {
+      includeSeconds: true,
+      locale: KG,
+      addSuffix: true,
+    });
+
+    let minutes = Math.floor(this.state.timer / 60);
+    let seconds = this.state.timer % 60;
+    if (minutes < 10) {
+      minutes = '0' + minutes;
+    }
+    if (seconds < 10) {
+      seconds = '0' + seconds;
+    }
+    if (this.state.timer <= 0) {
+      clearInterval(this.interval);
+    }
+
     return (
-      <li className={completed ? 'completed' : this.state.editing ? 'editing' : null}>
+      <li className={liClass}>
         <div className="view">
-          <input
-            id={id}
-            className="toggle"
-            type="checkbox"
-            checked={completed}
-            onChange={(event) => changeStatus(id, event.target.checked)}
-          />
+          <input className="toggle" type="checkbox" id={id} onChange={onDone} checked={liChecked} />
           <label htmlFor={id}>
-            <span className="description">{label}</span>
-            <span className="created">{`created ${formatDistanceToNow(date, {
-              includeSeconds: true,
-              locale: KG,
-              addSuffix: true,
-            })}`}</span>
+            {text && (
+              <>
+                <span className="title">{text}</span>
+                <span className="description">
+                  <button className="icon icon-play" onClick={this.changeTimer}></button>
+                  <button className="icon icon-pause" onClick={this.pauseTimer}></button>
+                  {`${minutes}:${seconds}`}
+                </span>
+                <span className="description">{`created ${timeCreated}`}</span>
+              </>
+            )}
           </label>
-          <button
-            type="button"
-            className="icon icon-edit"
-            onClick={() =>
-              this.setState(({ editing }) => ({
-                editing: !editing,
-                value: todo.label,
-              }))
-            }
-          ></button>
-          <button type="button" className="icon icon-destroy" onClick={() => deleteTask(id)}></button>
+          <button className="icon icon-edit" onClick={editTask}></button>
+          <button className="icon icon-destroy" onClick={onDeleted}></button>
         </div>
-        {this.state.editing && (
-          <form onSubmit={this.handleSubmit}>
+        {
+          (liClass = 'editing' && (
             <input
               type="text"
               className="edit"
               value={this.state.value}
-              onChange={(event) => this.setState({ value: event.target.value })}
+              onChange={this.editValue}
+              onKeyDown={saveChanges}
+              autoFocus
             />
-          </form>
-        )}
+          ))
+        }
       </li>
     );
   }
 }
 
-Task.propTypes = {
-  todo: PropTypes.shape({
-    id: PropTypes.number,
-    label: PropTypes.string,
-    completed: PropTypes.bool,
-    date: PropTypes.instanceOf(Date),
-  }),
-  changeStatus: PropTypes.func.isRequired,
-  editTask: PropTypes.func.isRequired,
-  deleteTask: PropTypes.func.isRequired,
+Task.defaultProps = {
+  done: false,
+  edit: false,
 };
 
-Task.defaultProps = {
-  todo: {},
+Task.propTypes = {
+  id: PropTypes.number,
+  editing: PropTypes.bool,
+  done: PropTypes.bool,
+  date: PropTypes.instanceOf(Date).isRequired,
+  text: PropTypes.string,
+  onDeleted: PropTypes.func.isRequired,
+  editTask: PropTypes.func.isRequired,
+  saveChanges: PropTypes.func.isRequired,
+  onDone: PropTypes.func.isRequired,
 };

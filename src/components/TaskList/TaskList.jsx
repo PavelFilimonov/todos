@@ -1,30 +1,42 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-
-import './TaskList.css';
 
 import Task from '../Task';
 
-export default class TaskList extends Component {
-  render() {
-    const { todos, changeStatus, editTask, deleteTask } = this.props;
-    return (
-      <ul className="todo-list">
-        {todos.map((todo) => (
-          <Task key={todo.id} todo={todo} changeStatus={changeStatus} editTask={editTask} deleteTask={deleteTask} />
-        ))}
-      </ul>
-    );
+export default function TaskList({ tasks, onDeleted, editTask, saveChanges, onDone, btnFilter }) {
+  let filteredTasks;
+  if (btnFilter === 1) {
+    filteredTasks = [...tasks];
+  } else if (btnFilter === 2) {
+    filteredTasks = tasks.filter((task) => !task.done);
+  } else if (btnFilter === 3) {
+    filteredTasks = tasks.filter((task) => task.done);
   }
+
+  const items = filteredTasks.map((task) => {
+    const { id } = task;
+    return (
+      <Task
+        key={id}
+        {...task}
+        onDeleted={() => onDeleted(id)}
+        editTask={() => editTask(id)}
+        saveChanges={(event) => saveChanges(id, event)}
+        onDone={() => onDone(id)}
+      />
+    );
+  });
+  return <ul className="todo-list">{items}</ul>;
 }
 
-TaskList.protoTypes = {
-  todos: PropTypes.any,
-  changeStatus: PropTypes.func.isRequired,
-  editTask: PropTypes.func.isRequired,
-  deleteTask: PropTypes.func.isRequired,
+TaskList.defaultProps = {
+  btnFilter: 1,
 };
 
-TaskList.defaultProps = {
-  todos: {},
+TaskList.propTypes = {
+  task: PropTypes.array,
+  onDeleted: PropTypes.func.isRequired,
+  editTask: PropTypes.func.isRequired,
+  saveChanges: PropTypes.func.isRequired,
+  onDone: PropTypes.func.isRequired,
 };

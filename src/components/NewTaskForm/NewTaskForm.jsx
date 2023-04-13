@@ -1,38 +1,70 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
-import './NewTaskForm.css';
-
 export default class NewTaskForm extends Component {
   state = {
-    value: '',
+    text: '',
+    minutes: '',
+    seconds: '',
   };
 
-  handleChange = (event) => {
-    this.setState({ value: event.target.value });
+  changeText = (event) => {
+    this.setState(() => {
+      return { text: event.target.value };
+    });
   };
 
-  handleSubmit = (event) => {
+  changeMinutes = (event) => {
+    this.setState(() => {
+      return { minutes: event.target.value };
+    });
+  };
+
+  changeSeconds = (event) => {
+    this.setState(() => {
+      return { seconds: event.target.value };
+    });
+  };
+
+  createTask = (event) => {
     event.preventDefault();
-    if (this.state.value.trim()) {
-      this.props.addTask(this.state.value);
+    const { text, minutes, seconds } = this.state;
+    if (this.state.text) {
+      this.props.addTask(text, minutes, seconds);
     }
-    this.setState({ value: '' });
+    this.setState(() => {
+      return { text: '', minutes: '', seconds: '' };
+    });
   };
 
   render() {
-    const { placeholder } = this.props;
     return (
       <header className="header">
         <h1>todos</h1>
-        <form onSubmit={this.handleSubmit}>
+        <form className="new-todo-form" onSubmit={this.createTask}>
           <input
-            type="text"
             className="new-todo"
-            placeholder={placeholder}
-            value={this.state.value}
-            onChange={this.handleChange}
+            placeholder="Task"
+            type="text"
+            value={this.state.text}
+            onChange={this.changeText}
+            autoFocus
           />
+          <input
+            className="new-todo-form__timer"
+            placeholder="Min"
+            type="text"
+            value={this.state.minutes}
+            onChange={this.changeMinutes}
+          />
+          <input
+            className="new-todo-form__timer"
+            placeholder="Sec"
+            type="text"
+            value={this.state.seconds}
+            onChange={this.changeSeconds}
+          />
+          <button type="submit" />
         </form>
       </header>
     );
@@ -40,9 +72,5 @@ export default class NewTaskForm extends Component {
 }
 
 NewTaskForm.protoTypes = {
-  placeholder: PropTypes.string,
-};
-
-NewTaskForm.defaultProps = {
-  placeholder: 'What needs to be done?',
+  addTask: PropTypes.func.isRequired,
 };
