@@ -1,95 +1,90 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import KG from 'date-fns/locale/en-AU';
 import PropTypes from 'prop-types';
 
-export default class Task extends Component {
-  state = {
-    value: this.props.text,
-    timer: this.props.timeLeft,
-  };
+export default function Task({ text, timeLeft, id, editing, done, date, onDeleted, editTask, saveChanges, onDone }) {
+  const [value, setValue] = useState(text);
+  const [timer, setTimer] = useState(timeLeft);
+  const [countDown, setCountDown] = useState(false);
 
-  interval = null;
+  useEffect(() => {
+    if (countDown) changeTimer();
+  }, [timer]);
 
-  changeTimer = () => {
-    if (this.state.timer > 0) {
-      this.interval = setInterval(() => this.setState({ timer: this.state.timer - 1 }), 1000);
+  let interval = null;
+
+  const changeTimer = () => {
+    if (timer > 0) {
+      setCountDown(true);
+      interval = setTimeout(() => setTimer(timer - 1), 1000);
     }
   };
 
-  pauseTimer = () => {
-    clearInterval(this.interval);
+  const pauseTimer = () => {
+    setCountDown(false);
+    clearTimeout(interval);
   };
 
-  editValue = (event) => {
-    this.setState({ value: event.target.value });
+  const editValue = (event) => {
+    setValue(event.target.value);
   };
 
-  render() {
-    const { id, editing, done, date, text, onDeleted, editTask, saveChanges, onDone } = this.props;
-    let liClass = '';
-    let liChecked = '';
-    if (done) {
-      liClass = 'completed';
-      liChecked = 'checked';
-    }
-    if (editing) {
-      liClass = 'editing';
-    }
-
-    let timeCreated = formatDistanceToNow(date, {
-      includeSeconds: true,
-      locale: KG,
-      addSuffix: true,
-    });
-
-    let minutes = Math.floor(this.state.timer / 60);
-    let seconds = this.state.timer % 60;
-    if (minutes < 10) {
-      minutes = '0' + minutes;
-    }
-    if (seconds < 10) {
-      seconds = '0' + seconds;
-    }
-    if (this.state.timer <= 0) {
-      clearInterval(this.interval);
-    }
-
-    return (
-      <li className={liClass}>
-        <div className="view">
-          <input className="toggle" type="checkbox" id={id} onChange={onDone} checked={liChecked} />
-          <label htmlFor={id}>
-            {text && (
-              <>
-                <span className="title">{text}</span>
-                <span className="description">
-                  <button className="icon icon-play" onClick={this.changeTimer}></button>
-                  <button className="icon icon-pause" onClick={this.pauseTimer}></button>
-                  {`${minutes}:${seconds}`}
-                </span>
-                <span className="description">{`created ${timeCreated}`}</span>
-              </>
-            )}
-          </label>
-          <button className="icon icon-edit" onClick={editTask}></button>
-          <button className="icon icon-destroy" onClick={onDeleted}></button>
-        </div>
-        {
-          (liClass = 'editing' && (
-            <input
-              type="text"
-              className="edit"
-              value={this.state.value}
-              onChange={this.editValue}
-              onKeyDown={saveChanges}
-              autoFocus
-            />
-          ))
-        }
-      </li>
-    );
+  let liClass = '';
+  let liChecked = '';
+  if (done) {
+    liClass = 'completed';
+    liChecked = 'checked';
   }
+  if (editing) {
+    liClass = 'editing';
+  }
+
+  let timeCreated = formatDistanceToNow(date, {
+    includeSeconds: true,
+    locale: KG,
+    addSuffix: true,
+  });
+
+  let minutes = Math.floor(timer / 60);
+  let seconds = timer % 60;
+  if (minutes < 10) {
+    minutes = '0' + minutes;
+  }
+  if (seconds < 10) {
+    seconds = '0' + seconds;
+  }
+  if (timer <= 0) {
+    clearInterval(interval);
+  }
+
+  return (
+    <li className={liClass}>
+      <div className="view">
+        <input className="toggle" type="checkbox" id={id} onChange={onDone} checked={liChecked} />
+        <label htmlFor={id}>
+          {text && (
+            <>
+              <span className="title">{text}</span>
+              <span className="description">
+                <button className="icon icon-play" onClick={changeTimer}></button>
+                <button className="icon icon-pause" onClick={pauseTimer}></button>
+                {`${minutes}:${seconds}`}
+              </span>
+              <span className="description">{`created ${timeCreated}`}</span>
+            </>
+          )}
+        </label>
+        <button className="icon icon-edit" onClick={editTask}></button>
+        <button className="icon icon-destroy" onClick={onDeleted}></button>
+      </div>
+      {
+        (liClass = 'editing' && (
+          <input type="text" className="edit" value={value} onChange={editValue} onKeyDown={saveChanges} autoFocus />
+        ))
+      }
+    </li>
+  );
 }
 
 Task.defaultProps = {
