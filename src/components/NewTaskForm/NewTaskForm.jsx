@@ -8,6 +8,10 @@ export default class NewTaskForm extends Component {
     seconds: '',
   };
 
+  testFunc = () => {
+    let test = 0;
+  }
+
   changeText = (event) => {
     this.setState(() => {
       return { text: event.target.value };
