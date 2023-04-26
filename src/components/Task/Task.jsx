@@ -78,11 +78,9 @@ export default function Task({ text, timeLeft, id, editing, done, date, onDelete
         <button className="icon icon-edit" onClick={editTask}></button>
         <button className="icon icon-destroy" onClick={onDeleted}></button>
       </div>
-      {
-        (liClass = 'editing' && (
-          <input type="text" className="edit" value={value} onChange={editValue} onKeyDown={saveChanges} autoFocus />
-        ))
-      }
+      {liClass === 'editing' && (
+        <input type="text" className="edit" value={value} onChange={editValue} onKeyDown={saveChanges} autoFocus />
+      )}
     </li>
   );
 }

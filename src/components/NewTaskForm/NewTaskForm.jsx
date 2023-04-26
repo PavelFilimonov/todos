@@ -20,8 +20,19 @@ export default function NewTaskForm({ addTask }) {
 
   const createTask = (event) => {
     event.preventDefault();
-    if (text) {
-      addTask(text, minutes, seconds);
+    if (text && minutes) {
+      if (isFinite(minutes) && isFinite(seconds)) {
+        addTask(text, minutes, seconds);
+        setText('');
+        setMinutes('');
+        setSeconds('');
+      } else {
+        alert('Введите время выполнения задачи числом!');
+      }
+    } else if (text && !minutes) {
+      alert('Пожалуйста, введи время, необходимое на выполнение задачи!');
+    } else {
+      alert('Пожалуйста, напишите задачу и введи время, необходимое на выполнение задачи!');
     }
     setText('');
     setMinutes('');
