@@ -34,9 +34,6 @@ export default function NewTaskForm({ addTask }) {
     } else {
       alert('Пожалуйста, напишите задачу и введи время, необходимое на выполнение задачи!');
     }
-    setText('');
-    setMinutes('');
-    setSeconds('');
   };
 
   return (
